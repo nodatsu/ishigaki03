@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 // import 'package:syncfusion_flutter_calendar/calendar.dart';
 // import 'package:intl/intl.dart';
-// import 'package:google_sign_in/google_sign_in.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 // import 'package:googleapis_auth/googleapis_auth.dart';
 // import 'package:googleapis/abusiveexperiencereport/v1.dart';
 // import 'package:googleapis/acceleratedmobilepageurl/v1.dart';
@@ -41,7 +41,7 @@ import 'package:flutter/material.dart';
 // import 'package:googleapis/blogger/v3.dart';
 // import 'package:googleapis/books/v1.dart';
 // import 'package:googleapis/businessprofileperformance/v1.dart';
-// import 'package:googleapis/calendar/v3.dart';
+import 'package:googleapis/calendar/v3.dart' hide Colors;
 // import 'package:googleapis/certificatemanager/v1.dart';
 // import 'package:googleapis/chat/v1.dart';
 // import 'package:googleapis/chromemanagement/v1.dart';
@@ -268,15 +268,52 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    // clientId: '779890736629-ffee4rgvu6lt6v87dnlg2dn5sulvvmot.apps.googleusercontent.com',
+    scopes: <String>[CalendarApi.calendarScope],
+  );
+
+  GoogleSignInAccount? _currentUser;
+
+  @override
+  void initState() {
+    print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% initState()");
+    super.initState();
+    _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
+      setState(() {
+        _currentUser = account;
+      });
+      print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% onCurrentUserChanged");
+      if (_currentUser != null) {
+        print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" + _currentUser!.email);
+        //getGoogleEventsData();
+      }
+    });
+    _googleSignIn.signInSilently();
+  }
+
+  Future<List<Event>> getGoogleEventsData() async {
+    final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+
+    final List<Event> appointments = <Event>[];
+    return appointments;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('サンプルタイトル'),
       ),
-      body: const Text(
-        'ダミーテキスト',
-      ),
+      body:
+      FutureBuilder(
+        future: getGoogleEventsData(),
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          return const Text(
+            'ダミーテキスト',
+          );
+        },
+     ),
     );
   }
 }
