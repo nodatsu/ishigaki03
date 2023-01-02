@@ -282,15 +282,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
-    print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% initState()");
     super.initState();
     _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
       setState(() {
         _currentUser = account;
       });
-      print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% onCurrentUserChanged");
       if (_currentUser != null) {
-        print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" + _currentUser!.email);
         //getGoogleEventsData();
       }
     });
@@ -299,8 +296,25 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<List<Event>> getGoogleEventsData() async {
     final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+    final GoogleAPIClient httpClient = GoogleAPIClient(await googleUser!.authHeaders);
 
+    final CalendarApi calendarApi = CalendarApi(httpClient);
+    final Events calEvents = await calendarApi.events.list(
+      "primary",
+    );
     final List<Event> appointments = <Event>[];
+    if (calEvents.items != null) {
+      print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% calEvents.items " + calEvents!.items!.length.toString());
+      for (int i = 0; i < calEvents.items!.length; i++) {
+        final Event event = calEvents.items![i];
+        if (event.start == null) {
+          print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% event.start " + event.start.toString());
+          continue;
+        }
+        print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% appointments " + appointments.length.toString());
+        appointments.add(event);
+      }
+    }
     return appointments;
   }
 
