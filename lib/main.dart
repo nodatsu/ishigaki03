@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 
 import 'package:syncfusion_flutter_calendar/calendar.dart';
+
 // import 'package:intl/intl.dart';
+import 'package:http/http.dart';
+import 'package:http/io_client.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+
 // import 'package:googleapis_auth/googleapis_auth.dart';
 // import 'package:googleapis/abusiveexperiencereport/v1.dart';
 // import 'package:googleapis/acceleratedmobilepageurl/v1.dart';
@@ -42,6 +46,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 // import 'package:googleapis/books/v1.dart';
 // import 'package:googleapis/businessprofileperformance/v1.dart';
 import 'package:googleapis/calendar/v3.dart' hide Colors;
+
 // import 'package:googleapis/certificatemanager/v1.dart';
 // import 'package:googleapis/chat/v1.dart';
 // import 'package:googleapis/chromemanagement/v1.dart';
@@ -305,15 +310,14 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text('サンプルタイトル'),
       ),
-      body:
-      FutureBuilder(
+      body: FutureBuilder(
         future: getGoogleEventsData(),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           return const Text(
             'ダミーテキスト',
           );
         },
-     ),
+      ),
     );
   }
 }
@@ -340,8 +344,8 @@ class GoogleDataSource extends CalendarDataSource {
     return event.endTimeUnspecified != null && event!.endTimeUnspecified!
         ? (event.start!.date ?? event.start!.dateTime!.toLocal())
         : (event.end!.date != null
-        ? event.end!.date!.add(Duration(days: -1))
-        : event.end!.dateTime!.toLocal());
+            ? event.end!.date!.add(Duration(days: -1))
+            : event.end!.dateTime!.toLocal());
   }
 
   @override
@@ -361,4 +365,19 @@ class GoogleDataSource extends CalendarDataSource {
         ? 'No Title'
         : event.summary!;
   }
+}
+
+class GoogleAPIClient extends IOClient {
+  final Map<String, String> _headers;
+
+  GoogleAPIClient(this._headers) : super();
+
+  @override
+  Future<IOStreamedResponse> send(BaseRequest request) =>
+      super.send(request..headers.addAll(_headers));
+
+  @override
+  Future<Response> head(Uri url, {Map<String, String>? headers}) =>
+      super.head(url,
+          headers: (headers != null ? (headers..addAll(_headers)) : headers));
 }
